@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_filtered %}{{ control_type_display }} - {% endif %}Nazoratlar - DISCRETE STRUCTURES{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% if is_filtered %}{{ control_type_display }}{% else %}Nazoratlar{% endif %}</h1>
+    <nav class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+        <span>/</span>
+        <a href="{% url 'controls' %}">Nazoratlar</a>
+        {% if is_filtered %}
+            <span>/</span>
+            <span>{{ control_type_display }}</span>
+        {% endif %}
+    </nav>
+</div>
+
+<div class="controls-grid">
+    {% if is_filtered %}
+        {# Faqat filtrlangan turdagi testlarni ko'rsatish #}
+        <div class="control-section">
+            <h2 class="section-title">
+                <i class="fas fa-clipboard-check"></i>
+                {{ control_type_display }}
+                <span class="section-count">({{ controls|length }} ta test)</span>
+            </h2>
+            
+            <div class="controls-list">
+                {% for control in controls %}
+                <div class="control-card">
+                    <div class="control-header">
+                        <div class="control-title-section">
+                            <h3>{{ control.title }}</h3>
+                            {% if control.user_result %}
+                                <div class="user-result-badge {% if control.user_result.passed %}passed{% else %}failed{% endif %}">
+                                    <i class="fas {% if control.user_result.passed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                                    {{ control.user_result.percentage|floatformat:1 }}%
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="control-meta">
+                            <span class="questions-count">
+                                <i class="fas fa-question-circle"></i>
+                                {{ control.num_questions_to_display }} ta savol
+                            </span>
+                            <span class="time-limit">
+                                <i class="fas fa-clock"></i>
+                                {{ control.time_limit_minutes }} daqiqa
+                            </span>
+                            <span class="passing-score">
+                                <i class="fas fa-percentage"></i>
+                                O'tish bali: {{ control.passing_score }}%
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-content">
+                        {% if control.description %}
+                            <p>{{ control.description }}</p>
+                        {% endif %}
+                        
+                        <div class="control-actions">
+                            {% if user.is_authenticated %}
+                                {% if control.user_result %}
+                                    <a href="{% url 'test_result' control.user_result.id %}" class="btn btn-outline">
+                                        <i class="fas fa-eye"></i>
+                                        Natijani ko'rish
+                                    </a>
+                                    {% if not control.user_result.passed %}
+                                        <a href="{% url 'take_test' control.id %}" class="btn btn-primary">
+                                            <i class="fas fa-redo"></i>
+                                            Qayta topshirish
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{% url 'take_test' control.id %}" class="btn btn-primary">
+                                        <i class="fas fa-play"></i>
+                                        Testni boshlash
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <a href="#" class="btn btn-disabled" onclick="alert('Testni topshirish uchun tizimga kiring')">
+                                    <i class="fas fa-lock"></i>
+                                    Tizimga kiring
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-controls">
+                    <p>Bu bo'limda hozircha nazoratlar mavjud emas.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        {# Barcha testlarni turlar bo'yicha guruhlab ko'rsatish #}
+        {% for control_type, controls in grouped_controls.items %}
+        <div class="control-section">
+            <h2 class="section-title">
+                <i class="fas fa-clipboard-check"></i>
+                {{ control_type }}
+                <span class="section-count">({{ controls|length }} ta test)</span>
+            </h2>
+            
+            <div class="controls-list">
+                {% for control in controls %}
+                <div class="control-card">
+                    <div class="control-header">
+                        <div class="control-title-section">
+                            <h3>{{ control.title }}</h3>
+                            {% if control.user_result %}
+                                <div class="user-result-badge {% if control.user_result.passed %}passed{% else %}failed{% endif %}">
+                                    <i class="fas {% if control.user_result.passed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                                    {{ control.user_result.percentage|floatformat:1 }}%
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="control-meta">
+                            <span class="questions-count">
+                                <i class="fas fa-question-circle"></i>
+                                {{ control.num_questions_to_display }} ta savol
+                            </span>
+                            <span class="time-limit">
+                                <i class="fas fa-clock"></i>
+                                {{ control.time_limit_minutes }} daqiqa
+                            </span>
+                            <span class="passing-score">
+                                <i class="fas fa-percentage"></i>
+                                O'tish bali: {{ control.passing_score }}%
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-content">
+                        {% if control.description %}
+                            <p>{{ control.description }}</p>
+                        {% endif %}
+                        
+                        <div class="control-actions">
+                            {% if user.is_authenticated %}
+                                {% if control.user_result %}
+                                    <a href="{% url 'test_result' control.user_result.id %}" class="btn btn-outline">
+                                        <i class="fas fa-eye"></i>
+                                        Natijani ko'rish
+                                    </a>
+                                    {% if not control.user_result.passed %}
+                                        <a href="{% url 'take_test' control.id %}" class="btn btn-primary">
+                                            <i class="fas fa-redo"></i>
+                                            Qayta topshirish
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{% url 'take_test' control.id %}" class="btn btn-primary">
+                                        <i class="fas fa-play"></i>
+                                        Testni boshlash
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <a href="#" class="btn btn-disabled" onclick="alert('Testni topshirish uchun tizimga kiring')">
+                                    <i class="fas fa-lock"></i>
+                                    Tizimga kiring
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-controls">
+                    <p>Bu bo'limda hozircha nazoratlar mavjud emas.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-controls">
+            <p>Hozircha nazoratlar mavjud emas.</p>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ material.title }}</h1>
+    <nav class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+        <span>/</span>
+        <a href="{% url 'course_materials_type' 'lecture' %}">{{ material.get_material_type_display }}</a>
+        <span>/</span>
+        <span>{{ material.title }}</span>
+    </nav>
+</div>
+
+<div class="material-detail">
+    <div class="material-header">
+        <div class="material-image">
+            {% if material.image %}
+                <img src="{{ material.image.url }}" alt="{{ material.title }}">
+            {% else %}
+                <img src="/placeholder.svg?height=300&width=400" alt="{{ material.title }}">
+            {% endif %}
+        </div>
+        <div class="material-info">
+            <h2>{{ material.title }}</h2>
+            <div class="material-meta">
+                <span class="material-type">{{ material.get_material_type_display }}</span>
+                <span class="credits">{{ material.credits }} kredit</span>
+            </div>
+            <p>{{ material.description }}</p>
+            <div class="material-actions">
+                {% if material.pdf_file %}
+                <a href="{{ material.pdf_file.url }}" target="_blank" class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i>
+                    PDF faylni ochish
+                </a>
+                {% endif %}
+                <button onclick="markAsCompleted({{ material.id }})" class="btn btn-success">
+                    <i class="fas fa-check"></i>
+                    Bajarildi deb belgilash
+                </button>
+            </div>
+        </div>
+    </div>
+    {% if material.pdf_file %}
+    <div class="pdf-viewer">
+        <iframe src="{{ material.pdf_file.url }}" width="100%" height="600px"></iframe>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function markAsCompleted(materialId) {
+    fetch(`/update-progress/${materialId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Material bajarildi deb belgilandi!');
+        }
+    });
+}
+</script>
+{% endblock %}

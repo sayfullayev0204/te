@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DISCRETE STRUCTURES{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <i class="fas fa-project-diagram"></i>
+                <span>DISCRETE STRUCTURES</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-profile">
+                <i class="fas fa-user-circle"></i>
+                {% if user.is_authenticated %}
+                    <span>{{ user.username }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-small">
+                <i class="fas fa-project-diagram"></i>
+                <span>DISCRETE STRUCTURES</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Bosh sahifa</span>
+                    </a>
+                </li>
+                
+                <!-- Fan meyyoriy hujjatlari dropdown section -->
+                <li class="nav-item-dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <i class="fas fa-book"></i>
+                        <span>Fan meyyoriy hujjatlari</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'regulatory_documents_type' 'course_program' %}" class="nav-link">Fan dasturi</a></li>
+                        <li><a href="{% url 'regulatory_documents_type' 'work_program' %}" class="nav-link">Ishchi dastur</a></li>
+                        <li><a href="{% url 'regulatory_documents_type' 'calendar_plan' %}" class="nav-link">Kalendar reja</a></li>
+                        <li><a href="{% url 'regulatory_documents_type' 'literature' %}" class="nav-link">Adabiyotlar</a></li>
+                        <li><a href="{% url 'regulatory_documents_type' 'glossary' %}" class="nav-link">Glossariyalar</a></li>
+                        <li><a href="{% url 'regulatory_documents' %}" class="nav-link">Barcha hujjatlar</a></li>
+                    </ul>
+                </li>
+
+                <!-- Fan ma'lumotlari dropdown section -->
+                <li class="nav-item-dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Fan ma'lumotlari</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'course_materials_type' 'lecture' %}" class="nav-link">Ma'ruza</a></li>
+                        <li><a href="{% url 'course_materials_type' 'practical' %}" class="nav-link">Amaliy mashg'ulot</a></li>
+                        <li><a href="{% url 'course_materials_type' 'laboratory' %}" class="nav-link">Laboratoriya ishi</a></li>
+                        <li><a href="{% url 'course_materials_type' 'independent' %}" class="nav-link">Mustaqil ish</a></li>
+                        <li><a href="{% url 'course_materials_type' 'video' %}" class="nav-link">Video darslar</a></li>
+                    </ul>
+                </li>
+
+                <!-- Nazoratlar dropdown section -->
+                <li class="nav-item-dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Nazoratlar</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'controls_type' 'midterm' %}" class="nav-link">Oraliq nazorat</a></li>
+                        <li><a href="{% url 'controls_type' 'final' %}" class="nav-link">Yakuniy nazorat</a></li>
+                        <li><a href="{% url 'controls' %}" class="nav-link">Barcha nazoratlar</a></li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <a href="{% url 'results' %}" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Natijalar</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="{% url 'assessment_criteria' %}" class="nav-link">
+                        <i class="fas fa-trophy"></i>
+                        <span>Baholash mezonlari</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>Bog'lanish</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% load static %}
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

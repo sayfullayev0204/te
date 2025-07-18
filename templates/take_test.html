@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ test.title }} - DISCRETE STRUCTURES{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ test.title }}</h1>
+    <nav class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+        <span>/</span>
+        <a href="{% url 'controls' %}">Nazoratlar</a>
+        <span>/</span>
+        <span>{{ test.title }}</span>
+    </nav>
+</div>
+
+<div class="test-container">
+    <div class="test-info">
+        <div class="test-meta">
+            <span class="questions-count">
+                <i class="fas fa-question-circle"></i>
+                {{ test.num_questions_to_display }} ta savol
+            </span>
+            <span class="time-limit">
+                <i class="fas fa-clock"></i>
+                {{ test.time_limit_minutes }} daqiqa
+            </span>
+            <span class="passing-score">
+                <i class="fas fa-percentage"></i>
+                O'tish bali: {{ test.passing_score }}%
+            </span>
+        </div>
+        
+        {% if test.description %}
+            <div class="test-description">
+                <p>{{ test.description }}</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <form method="post" class="test-form">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+        <div class="question-card">
+            <div class="question-header">
+                <span class="question-number">{{ forloop.counter }}-savol</span>
+                <span class="question-points">{{ question.points }} ball</span>
+            </div>
+            
+            <div class="question-text">
+                {{ question.question_text|linebreaks }}
+            </div>
+            
+            {% if question.question_type == 'multiple_choice' %}
+                <div class="answers-list">
+                    {% for answer in question.answers.all %}
+                    <label class="answer-option">
+                        <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
+                        <span class="answer-text">{{ answer.answer_text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            {% elif question.question_type == 'written' %}
+                <div class="written-answer">
+                    <label for="written_{{ question.id }}" class="written-label">Javobingizni yozing:</label>
+                    <textarea name="written_{{ question.id }}" id="written_{{ question.id }}" rows="5" placeholder="Bu yerga javobingizni yozing..." required></textarea>
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <div class="test-actions">
+            <button type="submit" class="btn btn-primary btn-large">
+                <i class="fas fa-check"></i>
+                Testni yakunlash
+            </button>
+            <button type="button" class="btn btn-outline" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+                Orqaga
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Timer functionality
+let timeLeft = {{ test.time_limit_minutes }} * 60; // Convert to seconds
+
+function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    
+    const timerDisplay = document.getElementById('timer');
+    if (timerDisplay) {
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Change color when time is running out
+        if (timeLeft <= 300) { // 5 minutes
+            timerDisplay.style.color = '#dc2626';
+            timerDisplay.parentElement.style.backgroundColor = '#fee2e2';
+        } else if (timeLeft <= 600) { // 10 minutes
+            timerDisplay.style.color = '#d97706';
+            timerDisplay.parentElement.style.backgroundColor = '#fef3c7';
+        }
+    }
+    
+    if (timeLeft <= 0) {
+        alert('Vaqt tugadi! Test avtomatik yakunlanadi.');
+        document.querySelector('.test-form').submit();
+        return;
+    }
+    
+    timeLeft--;
+}
+
+// Add timer to page
+document.addEventListener('DOMContentLoaded', function() {
+    const testInfo = document.querySelector('.test-info');
+    const timerDiv = document.createElement('div');
+    timerDiv.className = 'timer-display';
+    timerDiv.innerHTML = '<i class="fas fa-stopwatch"></i> <span id="timer">{{ test.time_limit_minutes }}:00</span>';
+    testInfo.appendChild(timerDiv);
+    
+    setInterval(updateTimer, 1000);
+    
+    // Auto-save functionality
+    const form = document.querySelector('.test-form');
+    const inputs = form.querySelectorAll('input, textarea');
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Save to localStorage
+        });
+    });
+    
+    // Restore saved answers
+    inputs.forEach(input => {
+        if (saved) {
+            if (input.type === 'radio') {
+                if (input.value === saved) {
+                    input.checked = true;
+                }
+            } else {
+                input.value = saved;
+            }
+        }
+    });
+    
+    // Clear saved data on submit
+    form.addEventListener('submit', function() {
+        inputs.forEach(input => {
+        });
+    });
+});
+
+// Prevent accidental page refresh
+window.addEventListener('beforeunload', function(e) {
+    e.preventDefault();
+    e.returnValue = 'Test davom etmoqda. Sahifani yopishni xohlaysizmi?';
+});
+</script>
+{% endblock %}

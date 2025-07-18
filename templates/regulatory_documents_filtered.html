@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ document_type_display }} - DISCRETE STRUCTURES{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ document_type_display }}</h1>
+    <nav class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+        <span>/</span>
+        <a href="{% url 'regulatory_documents' %}">Fan meyyoriy hujjatlari</a>
+        <span>/</span>
+        <span>{{ document_type_display }}</span>
+    </nav>
+</div>
+
+<div class="documents-container">
+    {% if documents %}
+        <div class="documents-list">
+            {% for document in documents %}
+            <div class="document-card">
+                <div class="document-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <div class="document-info">
+                    <h3>{{ document.title }}</h3>
+                    {% if document.description %}
+                        <p>{{ document.description }}</p>
+                    {% endif %}
+                    <div class="document-meta">
+                        <span class="date">
+                            <i class="fas fa-calendar"></i>
+                            {{ document.created_at|date:"d.m.Y" }}
+                        </span>
+                        <span class="type">
+                            <i class="fas fa-tag"></i>
+                            {{ document.get_document_type_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="document-actions">
+                    {% if document.pdf_file %}
+                        <a href="{{ document.pdf_file.url }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-eye"></i>
+                            Ko'rish
+                        </a>
+                        <a href="{{ document.pdf_file.url }}" download class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            Yuklab olish
+                        </a>
+                    {% else %}
+                        <span class="btn btn-disabled">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Fayl mavjud emas
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Back to all documents -->
+        <div class="back-to-all">
+            <a href="{% url 'regulatory_documents' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Barcha hujjatlarga qaytish
+            </a>
+        </div>
+    {% else %}
+        <div class="no-documents">
+            <div class="no-documents-icon">
+                <i class="fas fa-file-pdf"></i>
+            </div>
+            <h3>{{ document_type_display }} bo'yicha hujjatlar topilmadi</h3>
+            <p>Bu bo'limda hozircha hujjatlar mavjud emas.</p>
+            <a href="{% url 'regulatory_documents' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i>
+                Barcha hujjatlarga qaytish
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

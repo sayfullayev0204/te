@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Bosh sahifa</h1>
+    <nav class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <span>Bosh sahifa</span>
+    </nav>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card purple">
+        <div class="stat-content">
+            <h3>Jami soatlar</h3>
+            <div class="stat-number">{{ stats.total_hours }}</div>
+            <div class="stat-subtitle">Fan 4 kredit</div>
+        </div>
+        <div class="stat-progress">
+            <div class="progress-text">O'tilgan soatlar foizi</div>
+            <div class="progress-value">78%</div>
+        </div>
+    </div>
+    
+    <div class="stat-card blue">
+        <div class="stat-content">
+            <h3>Ma'ruzalar</h3>
+            <div class="stat-number">{{ stats.lectures }}</div>
+            <div class="stat-subtitle">Fan 6 kredit</div>
+        </div>
+        <div class="stat-progress">
+            <div class="progress-text">O'tilgan soatlar foizi</div>
+            <div class="progress-value">88%</div>
+        </div>
+    </div>
+    
+    <div class="stat-card pink">
+        <div class="stat-content">
+            <h3>Amaliyotlar</h3>
+            <div class="stat-number">{{ stats.practicals }}</div>
+            <div class="stat-subtitle">Fan 6 kredit</div>
+        </div>
+        <div class="stat-progress">
+            <div class="progress-text">O'tilgan soatlar foizi</div>
+            <div class="progress-value">65%</div>
+        </div>
+    </div>
+    
+    <div class="stat-card green">
+        <div class="stat-content">
+            <h3>Laboratoriya</h3>
+            <div class="stat-number">{{ stats.labs }}</div>
+            <div class="stat-subtitle">Fan 4 kredit</div>
+        </div>
+        <div class="stat-progress">
+            <div class="progress-text">Bajarilgan ishlar</div>
+            <div class="progress-value">72%</div>
+        </div>
+    </div>
+    
+    <div class="stat-card light-blue">
+        <div class="stat-content">
+            <h3>Mustaqil ish</h3>
+            <div class="stat-number">{{ stats.independent }}</div>
+            <div class="stat-subtitle">Fan 6 kredit</div>
+        </div>
+        <div class="stat-progress">
+            <div class="progress-text">Bajarilgan topshiriqlar</div>
+            <div class="progress-value">90%</div>
+        </div>
+    </div>
+</div>
+
+<!-- Course Materials Section -->
+<section class="course-section">
+    <h2>Fan topshiriqlari</h2>
+    
+    <div class="materials-grid">
+        {% for material in recent_materials %}
+        <div class="material-card">
+            <div class="material-header">
+                <div class="material-type-badge">
+                    {% if material.material_type == 'video' %}
+                        <i class="fas fa-play-circle"></i>
+                    {% else %}
+                        <i class="fas fa-file-pdf"></i>
+                    {% endif %}
+                    {{ material.get_material_type_display }}
+                </div>
+                {% if material.duration_minutes > 0 %}
+                    <div class="duration">
+                        <i class="fas fa-clock"></i>
+                        {{ material.duration_minutes }} daq
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="material-content">
+                <h3>{{ material.title }}</h3>
+                <p>{{ material.description|truncatewords:15 }}</p>
+                
+                <div class="material-meta">
+                    {% if material.credits > 0 %}
+                        <span class="credits">{{ material.credits }} kredit</span>
+                    {% endif %}
+                    <span class="date">{{ material.created_at|date:"d.m.Y" }}</span>
+                </div>
+                
+                <div class="material-actions">
+                    <a href="{% url 'material_detail' material.id %}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i>
+                        Batafsil
+                    </a>
+                    {% if material.get_file_url %}
+                        <a href="{{ material.get_file_url }}" target="_blank" class="btn btn-outline">
+                            {% if material.material_type == 'video' %}
+                                <i class="fas fa-play"></i>
+                                Ko'rish
+                            {% else %}
+                                <i class="fas fa-file-pdf"></i>
+                                PDF
+                            {% endif %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-materials">
+            <p>Hozircha materiallar mavjud emas.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Settings Button -->
+<button class="settings-btn">
+    <i class="fas fa-cog"></i>
+</button>
+{% endblock %}

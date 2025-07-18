@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_filtered %}{{ doc_type_display }} - {% endif %}Meyoriy hujjatlar - DISCRETE STRUCTURES{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% if is_filtered %}{{ doc_type_display }}{% else %}Fan meyyoriy hujjatlari{% endif %}</h1>
+    <nav class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+        <span>/</span>
+        <a href="{% url 'regulatory_documents' %}">Meyoriy hujjatlar</a>
+        {% if is_filtered %}
+            <span>/</span>
+            <span>{{ doc_type_display }}</span>
+        {% endif %}
+    </nav>
+</div>
+
+{% if is_filtered %}
+    <div class="documents-grid">
+        <div class="document-section">
+            <h2 class="section-title">
+                <i class="fas fa-file-pdf"></i>
+                {{ doc_type_display }}
+            </h2>
+            <div class="documents-list">
+                {% for document in documents %}
+                <div class="document-card">
+                    <div class="document-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="document-info">
+                        <h3>{{ document.title }}</h3>
+                        {% if document.description %}
+                            <p>{{ document.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        <div class="document-meta">
+                            <span class="date">{{ document.created_at|date:"d.m.Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="document-actions">
+                        <a href="{{ document.pdf_file.url }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-eye"></i>
+                            Ko'rish
+                        </a>
+                        <a href="{{ document.pdf_file.url }}" download class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            Yuklab olish
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-documents">
+                    <p>Bu bo'limda hozircha hujjatlar mavjud emas.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="documents-grid">
+        {% for doc_type, documents in grouped_documents.items %}
+        <div class="document-section">
+            <h2 class="section-title">
+                <i class="fas fa-file-pdf"></i>
+                {{ doc_type }}
+            </h2>
+            
+            <div class="documents-list">
+                {% for document in documents %}
+                <div class="document-card">
+                    <div class="document-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="document-info">
+                        <h3>{{ document.title }}</h3>
+                        {% if document.description %}
+                            <p>{{ document.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        <div class="document-meta">
+                            <span class="date">{{ document.created_at|date:"d.m.Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="document-actions">
+                        <a href="{{ document.pdf_file.url }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-eye"></i>
+                            Ko'rish
+                        </a>
+                        <a href="{{ document.pdf_file.url }}" download class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            Yuklab olish
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-documents">
+                    <p>Bu bo'limda hozircha hujjatlar mavjud emas.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-documents">
+            <p>Hozircha meyoriy hujjatlar mavjud emas.</p>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

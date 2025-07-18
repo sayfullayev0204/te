@@ -1,0 +1,513 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ result.control_test.title }} - Natija{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Test natijalari</h1>
+    <nav class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+        <span>/</span>
+        <a href="{% url 'results' %}">Natijalar</a>
+        <span>/</span>
+        <span>{{ result.control_test.title }}</span>
+    </nav>
+</div>
+
+<div class="result-container">
+    <!-- Result Summary -->
+    <div class="result-summary-card {% if result.passed %}passed{% else %}failed{% endif %}">
+        <div class="result-summary-header">
+            <div class="result-info">
+                <h2>{{ result.control_test.title }}</h2>
+                <p class="result-description">{{ result.control_test.description }}</p>
+            </div>
+            <div class="result-badge {% if result.passed %}passed{% else %}failed{% endif %}">
+                <i class="fas {% if result.passed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                <span>{% if result.passed %}MUVAFFAQIYATLI{% else %}MUVAFFAQIYATSIZ{% endif %}</span>
+            </div>
+        </div>
+        
+        <div class="result-stats">
+            <div class="stat-item">
+                <div class="stat-label">Umumiy ball</div>
+                <div class="stat-value">{{ result.percentage|floatformat:1 }}%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">To'plangan ball</div>
+                <div class="stat-value">{{ result.score }}/{{ result.total_points }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">O'tish bali</div>
+                <div class="stat-value">{{ result.control_test.passing_score }}%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Sarflangan vaqt</div>
+                <div class="stat-value">{{ result.time_spent_minutes }} daq</div>
+            </div>
+        </div>
+        
+        <div class="result-progress-bar">
+            <div class="progress-track">
+                <div class="progress-fill {% if result.passed %}passed{% else %}failed{% endif %}" 
+                     style="width: {{ result.percentage }}%"></div>
+                <div class="progress-threshold" 
+                     style="left: {{ result.control_test.passing_score }}%"></div>
+            </div>
+            <div class="progress-labels">
+                <span>0%</span>
+                <span class="threshold-label">{{ result.control_test.passing_score }}%</span>
+                <span>100%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="detailed-results">
+        <h3>Batafsil natijalar</h3>
+        
+        {% for student_answer in result.student_answers.all %}
+        <div class="question-result {% if student_answer.is_correct %}correct{% else %}incorrect{% endif %}">
+            <div class="question-result-header">
+                <span class="question-number">{{ forloop.counter }}-savol</span>
+                <span class="question-points">
+                    {{ student_answer.points_earned }}/{{ student_answer.question.points }} ball
+                </span>
+                <span class="question-status">
+                    <i class="fas {% if student_answer.is_correct %}fa-check{% else %}fa-times{% endif %}"></i>
+                </span>
+            </div>
+            
+            <div class="question-text">
+                {{ student_answer.question.question_text|linebreaks }}
+            </div>
+            
+            {% if student_answer.question.question_type == 'multiple_choice' %}
+                <div class="answers-review">
+                    {% for answer in student_answer.question.answers.all %}
+                    <div class="answer-review 
+                        {% if answer.is_correct %}correct-answer{% endif %}
+                        {% if answer == student_answer.selected_answer %}selected-answer{% endif %}">
+                        <span class="answer-letter">{{ forloop.counter|add:64 }}</span>
+                        <span class="answer-text">{{ answer.answer_text }}</span>
+                        {% if answer.is_correct %}
+                            <i class="fas fa-check answer-icon correct"></i>
+                        {% elif answer == student_answer.selected_answer and not answer.is_correct %}
+                            <i class="fas fa-times answer-icon incorrect"></i>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% elif student_answer.question.question_type == 'written' %}
+                <div class="written-answer-review">
+                    <div class="student-written-answer">
+                        <h4>Sizning javobingiz:</h4>
+                        <div class="written-content">{{ student_answer.written_answer|linebreaks }}</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Actions -->
+    <div class="result-actions">
+        <a href="{% url 'results' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+            Natijalar ro'yxatiga qaytish
+        </a>
+        {% if not result.passed %}
+            <a href="{% url 'take_test' result.control_test.id %}" class="btn btn-primary">
+                <i class="fas fa-redo"></i>
+                Qayta topshirish
+            </a>
+        {% endif %}
+        <button onclick="window.print()" class="btn btn-success">
+            <i class="fas fa-print"></i>
+            Chop etish
+        </button>
+    </div>
+</div>
+<style>
+    /* General styles */
+.result-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Page header */
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.breadcrumb a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb i {
+    margin-right: 5px;
+    color: #666;
+}
+
+.breadcrumb span {
+    margin: 0 5px;
+}
+
+/* Result summary card */
+.result-summary-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.result-summary-card.passed {
+    border-left: 4px solid #28a745;
+}
+
+.result-summary-card.failed {
+    border-left: 4px solid #dc3545;
+}
+
+.result-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.result-info h2 {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0 0 10px;
+}
+
+.result-description {
+    font-size: 1rem;
+    color: #666;
+    margin: 0;
+}
+
+.result-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+
+.result-badge.passed {
+    background-color: #e6f4ea;
+    color: #28a745;
+}
+
+.result-badge.failed {
+    background-color: #f8d7da;
+    color: #dc3545;
+}
+
+.result-badge i {
+    font-size: 1.2rem;
+}
+
+.result-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    flex: 1;
+    min-width: 150px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.result-progress-bar {
+    margin-top: 20px;
+}
+
+.progress-track {
+    height: 12px;
+    background-color: #f1f1f1;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.passed {
+    background-color: #28a745;
+}
+
+.progress-fill.failed {
+    background-color: #dc3545;
+}
+
+.progress-threshold {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background-color: #333;
+    z-index: 1;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+.threshold-label {
+    position: relative;
+    transform: translateX(-50%);
+}
+
+/* Detailed results */
+.detailed-results {
+    margin-top: 30px;
+}
+
+.detailed-results h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.question-result {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.question-result.correct {
+    border-left: 4px solid #28a745;
+}
+
+.question-result.incorrect {
+    border-left: 4px solid #dc3545;
+}
+
+.question-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.question-number {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.question-points {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.question-status i {
+    font-size: 1.2rem;
+}
+
+.question-status .fa-check {
+    color: #28a745;
+}
+
+.question-status .fa-times {
+    color: #dc3545;
+}
+
+.question-text {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.answers-review {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.answer-review {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+.answer-review.correct-answer {
+    background-color: #e6f4ea;
+}
+
+.answer-review.selected-answer {
+    border: 1px solid #007bff;
+}
+
+.answer-letter {
+    font-weight: bold;
+    color: #333;
+}
+
+.answer-text {
+    flex: 1;
+    color: #333;
+}
+
+.answer-icon.correct {
+    color: #28a745;
+}
+
+.answer-icon.incorrect {
+    color: #dc3545;
+}
+
+.written-answer-review {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.written-answer-review h4 {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.written-content {
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Result actions */
+.result-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.btn i {
+    margin-right: 8px;
+}
+
+.btn-outline {
+    border: 1px solid #007bff;
+    color: #007bff;
+    background-color: transparent;
+}
+
+.btn-outline:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .result-summary-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .result-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .result-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .question-result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+</style>
+{% endblock %}

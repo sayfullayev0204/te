@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+
+{% block title %}Natijalar - DISCRETE STRUCTURES{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Mening natijalarim</h1>
+    <nav class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+        <span>/</span>
+        <span>Natijalar</span>
+    </nav>
+</div>
+
+<div class="results-container">
+    {% if results %}
+        <div class="results-summary">
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>Jami testlar</h3>
+                        <div class="summary-number">{{ results.count }}</div>
+                    </div>
+                </div>
+                
+                <div class="summary-card success">
+                    <div class="summary-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>Muvaffaqiyatli</h3>
+                        <div class="summary-number">{{ results|length|add:"-1" }}</div>
+                    </div>
+                </div>
+                
+                <div class="summary-card average">
+                    <div class="summary-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>O'rtacha ball</h3>
+                        <div class="summary-number">85%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-list">
+            {% for result in results %}
+            <div class="result-card {% if result.passed %}passed{% else %}failed{% endif %}">
+                <div class="result-header">
+                    <div class="result-title">
+                        <h3>{{ result.control_test.title }}</h3>
+                        <span class="result-type">{{ result.control_test.get_control_type_display }}</span>
+                    </div>
+                    <div class="result-score">
+                        <span class="score-percentage">{{ result.percentage|floatformat:1 }}%</span>
+                        <span class="score-points">{{ result.score }}/{{ result.total_points }}</span>
+                    </div>
+                </div>
+                
+                <div class="result-details">
+                    <div class="result-meta">
+                        <span class="result-date">
+                            <i class="fas fa-calendar"></i>
+                            {{ result.completed_at|date:"d.m.Y H:i" }}
+                        </span>
+                        <span class="result-duration">
+                            <i class="fas fa-clock"></i>
+                            {{ result.time_spent_minutes }} daqiqa
+                        </span>
+                        <span class="result-status {% if result.passed %}passed{% else %}failed{% endif %}">
+                            <i class="fas {% if result.passed %}fa-check{% else %}fa-times{% endif %}"></i>
+                            {% if result.passed %}O'tdi{% else %}O'tmadi{% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="result-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ result.percentage }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-actions">
+                    <a href="{% url 'test_result' result.id %}" class="btn btn-outline">
+                        <i class="fas fa-eye"></i>
+                        Batafsil ko'rish
+                    </a>
+                    {% if not result.passed %}
+                        <a href="{% url 'take_test' result.control_test.id %}" class="btn btn-primary">
+                            <i class="fas fa-redo"></i>
+                            Qayta topshirish
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-results">
+            <div class="no-results-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h3>Hozircha natijalar yo'q</h3>
+            <p>Siz hali birorta ham test topshirmagansiz.</p>
+            <a href="{% url 'controls' %}" class="btn btn-primary">
+                <i class="fas fa-play"></i>
+                Testlarni ko'rish
+            </a>
+        </div>
+    {% endif %}
+</div>
+<style>
+    /* General styles */
+.results-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Page header */
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.breadcrumb a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb i {
+    margin-right: 5px;
+    color: #666;
+}
+
+.breadcrumb span {
+    margin: 0 5px;
+}
+
+/* Summary cards */
+.results-summary {
+    margin-bottom: 40px;
+}
+
+.summary-cards {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.summary-card {
+    flex: 1;
+    min-width: 250px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+}
+
+.summary-card.success {
+    background-color: #e6f4ea;
+}
+
+.summary-card.average {
+    background-color: #fff3e0;
+}
+
+.summary-icon {
+    font-size: 2rem;
+    color: #007bff;
+    margin-right: 15px;
+}
+
+.summary-card.success .summary-icon {
+    color: #28a745;
+}
+
+.summary-card.average .summary-icon {
+    color: #ff9800;
+}
+
+.summary-content h3 {
+    font-size: 1.2rem;
+    margin: 0;
+    color: #333;
+}
+
+.summary-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Results list */
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.result-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: box-shadow 0.2s;
+}
+
+.result-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.result-card.passed {
+    border-left: 4px solid #28a745;
+}
+
+.result-card.failed {
+    border-left: 4px solid #dc3545;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.result-title h3 {
+    font-size: 1.5rem;
+    margin: 0;
+    color: #333;
+}
+
+.result-type {
+    font-size: 0.9rem;
+    color: #666;
+    background-color: #f1f1f1;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.result-score {
+    text-align: right;
+}
+
+.score-percentage {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.score-points {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.result-details {
+    margin-bottom: 15px;
+}
+
+.result-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.result-meta i {
+    margin-right: 5px;
+}
+
+.result-status.passed {
+    color: #28a745;
+}
+
+.result-status.failed {
+    color: #dc3545;
+}
+
+.result-progress {
+    height: 10px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #28a745;
+    transition: width 0.3s ease;
+}
+
+.result-card.failed .progress-fill {
+    background-color: #dc3545;
+}
+
+/* Result actions */
+.result-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.btn i {
+    margin-right: 5px;
+}
+
+.btn-outline {
+    border: 1px solid #007bff;
+    color: #007bff;
+    background-color: transparent;
+}
+
+.btn-outline:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* No results */
+.no-results {
+    text-align: center;
+    padding: 40px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.no-results-icon {
+    font-size: 3rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.no-results h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.no-results p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .summary-cards {
+        flex-direction: column;
+    }
+
+    .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .result-score {
+        text-align: left;
+    }
+
+    .result-meta {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .result-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

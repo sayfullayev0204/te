@@ -2,6 +2,96 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* Styling for the main content background image with blur effect */
+.main-content {
+    background: none; /* Remove direct background image from main-content */
+    position: relative; /* For overlay positioning */
+    min-height: 100vh; /* Full viewport height */
+    padding: 20px;
+}
+
+/* Apply background image with blur effect using a pseudo-element */
+.main-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/static/fon2.jpg'); /* Background image */
+    background-size: cover; /* Ensures the image covers the entire area */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    filter: blur(5px); /* Apply blur effect to the background image only */
+    z-index: 1;
+    background-attachment: fixed; /* Keeps background fixed for smoother effect */
+}
+
+/* Optional: Add a semi-transparent overlay for dimness */
+.main-content::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.084); /* Light overlay for readability */
+    z-index: 2;
+}
+
+/* Ensure main content children are above the blurred background and overlay */
+.main-content > * {
+    position: relative;
+    z-index: 3; /* Above both background and overlay */
+    color: #333; /* Default text color */
+}
+
+/* Ensure stat cards and material cards have a solid background for readability */
+.stat-card, .material-card {
+    background: rgba(255, 255, 255, 0.95); /* More opaque for readability */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the page header */
+.page-header {
+    background: rgba(255, 255, 255, 0.95); /* Opaque for readability */
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Style for the course section */
+.course-section {
+    background: rgba(255, 255, 255, 0.95); /* Opaque for readability */
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Settings button */
+.settings-btn {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 4; /* Above all layers */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 10px;
+    }
+    .stat-card, .material-card {
+        padding: 15px;
+    }
+}
+</style>
 <div class="page-header">
     <h1>Bosh sahifa</h1>
     <nav class="breadcrumb">
